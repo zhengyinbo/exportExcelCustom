@@ -40,9 +40,19 @@ public class ExcelExportAspect {
                         exportFields = new HashSet<>(Arrays.asList(exportFieldsParam.split(",")));
                     }
 
-                    Class<?> clazz = data.get(0).getClass();
-                    Workbook workbook = ExcelGenerator.generate(data, clazz, exportExcelCustom.sheetName(),
-                            exportFields);
+                    Workbook workbook;
+                    Object firstItem = data.get(0);
+                    if (firstItem instanceof com.example.export.model.SheetData) {
+                        // Multi-sheet export
+                        @SuppressWarnings("unchecked")
+                        List<com.example.export.model.SheetData> sheetDataList = (List<com.example.export.model.SheetData>) data;
+                        workbook = ExcelGenerator.generateMultiSheet(sheetDataList);
+                    } else {
+                        // Single-sheet export
+                        Class<?> clazz = firstItem.getClass();
+                        workbook = ExcelGenerator.generate(data, clazz, exportExcelCustom.sheetName(),
+                                exportFields);
+                    }
 
                     HttpServletResponse response = attributes.getResponse();
                     if (response != null) {

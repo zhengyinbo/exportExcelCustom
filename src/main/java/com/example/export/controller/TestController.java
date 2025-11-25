@@ -9,22 +9,49 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/export")
 public class TestController {
 
-    @GetMapping("/users")
-    @ExportExcelCustom(fileName = "user_export", sheetName = "User Data")
-    public List<UserVO> exportUsers() {
-        List<UserVO> users = new ArrayList<>();
-        users.add(new UserVO(1L, "Alice", 30, "alice@example.com", "1234567890", LocalDate.now().minusDays(10),
-                LocalDateTime.now().minusHours(2)));
-        users.add(new UserVO(2L, "Bob", 25, "bob@example.com", "0987654321", LocalDate.now().minusDays(5),
-                LocalDateTime.now().minusHours(5)));
-        users.add(new UserVO(3L, "Charlie", 35, "charlie@example.com", "1122334455", LocalDate.now().minusDays(20),
-                LocalDateTime.now().minusHours(10)));
-        return users;
-    }
+        @GetMapping("/users")
+        @ExportExcelCustom(fileName = "user_export", sheetName = "User Data")
+        public List<UserVO> exportUsers() {
+                List<UserVO> users = new ArrayList<>();
+                users.add(new UserVO(1L, "Alice", 30, "alice@example.com", "1234567890", LocalDate.now().minusDays(10),
+                                LocalDateTime.now().minusHours(2)));
+                users.add(new UserVO(2L, "Bob", 25, "bob@example.com", "0987654321", LocalDate.now().minusDays(5),
+                                LocalDateTime.now().minusHours(5)));
+                users.add(new UserVO(3L, "Charlie", 35, "charlie@example.com", "1122334455",
+                                LocalDate.now().minusDays(20),
+                                LocalDateTime.now().minusHours(10)));
+                return users;
+        }
+
+        @GetMapping("/users/multi")
+        @ExportExcelCustom(fileName = "multi_sheet_export")
+        public List<com.example.export.model.SheetData> exportMultiSheetUsers() {
+                List<UserVO> group1 = new ArrayList<>();
+                group1.add(new UserVO(1L, "Alice", 30, "alice@example.com", "1234567890", LocalDate.now().minusDays(10),
+                                LocalDateTime.now().minusHours(2)));
+                group1.add(new UserVO(2L, "Bob", 25, "bob@example.com", "0987654321", LocalDate.now().minusDays(5),
+                                LocalDateTime.now().minusHours(5)));
+
+                List<UserVO> group2 = new ArrayList<>();
+                group2.add(new UserVO(3L, "Charlie", 35, "charlie@example.com", "1122334455",
+                                LocalDate.now().minusDays(20),
+                                LocalDateTime.now().minusHours(10)));
+
+                List<com.example.export.model.SheetData> sheets = new ArrayList<>();
+                sheets.add(new com.example.export.model.SheetData("Group 1", group1, UserVO.class));
+                sheets.add(new com.example.export.model.SheetData("Group 2", group2, UserVO.class));
+                Set<String> exportFields = new HashSet<>();
+                exportFields.add("id");
+                exportFields.add("name");
+                sheets.add(new com.example.export.model.SheetData("Group 3", group2, UserVO.class, exportFields));
+                return sheets;
+        }
 }

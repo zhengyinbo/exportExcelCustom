@@ -17,6 +17,23 @@ public class ExcelGenerator {
     public static Workbook generate(List<?> data, Class<?> clazz, String sheetName, Set<String> exportFields)
             throws IllegalAccessException {
         Workbook workbook = new XSSFWorkbook();
+        createSheet(workbook, sheetName, data, clazz, exportFields);
+        return workbook;
+    }
+
+    public static Workbook generateMultiSheet(List<com.example.export.model.SheetData> sheetDataList)
+            throws IllegalAccessException {
+        Workbook workbook = new XSSFWorkbook();
+        for (com.example.export.model.SheetData sheetData : sheetDataList) {
+            createSheet(workbook, sheetData.getName(), sheetData.getData(), sheetData.getClazz(),
+                    sheetData.getExportFields());
+        }
+        return workbook;
+    }
+
+    private static void createSheet(Workbook workbook, String sheetName, List<?> data, Class<?> clazz,
+            Set<String> exportFields)
+            throws IllegalAccessException {
         Sheet sheet = workbook.createSheet(sheetName);
 
         // Get fields annotated with @ExcelField
@@ -35,7 +52,7 @@ public class ExcelGenerator {
                 .collect(Collectors.toList());
 
         if (fields.isEmpty()) {
-            return workbook;
+            return;
         }
 
         // Create styles
@@ -58,8 +75,6 @@ public class ExcelGenerator {
             ExcelField excelField = fields.get(i).getAnnotation(ExcelField.class);
             sheet.setColumnWidth(i, excelField.width() * 256);
         }
-
-        return workbook;
     }
 
     private static void createHeaders(Sheet sheet, List<Field> fields, CellStyle headerStyle) {
